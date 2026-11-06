@@ -74,8 +74,16 @@
   <form id="form" novalidate>
     <section>
       <h2><span class="step">1</span>Your contact info</h2>
-      <label for="contactName">Your name</label>
-      <input id="contactName" autocomplete="name" maxlength="100">
+      <div class="grid2">
+        <div>
+          <label for="firstName">First name</label>
+          <input id="firstName" autocomplete="given-name" maxlength="50">
+        </div>
+        <div>
+          <label for="lastName">Last name</label>
+          <input id="lastName" autocomplete="family-name" maxlength="50">
+        </div>
+      </div>
       <div class="grid2">
         <div>
           <label for="email">Email</label>
@@ -192,14 +200,19 @@
   });
   // Never let Enter submit/reload the page — payment happens only through the PayPal buttons.
   $('form').addEventListener('submit', function (e) { e.preventDefault(); });
-  ['contactName', 'email', 'phone'].forEach(function (id) { $(id).addEventListener('input', refresh); });
+  ['firstName', 'lastName', 'email', 'phone'].forEach(function (id) { $(id).addEventListener('input', refresh); });
 
   // Pre-fill runner 1 with the contact's name until they type their own.
   var runner1Touched = false;
   $('runners').addEventListener('input', function (e) { if (e.target.id === 'rn0') runner1Touched = true; });
-  $('contactName').addEventListener('input', function () {
-    if (!runner1Touched && $('rn0')) { runners[0].name = $('contactName').value; $('rn0').value = runners[0].name; refresh(); }
-  });
+  function prefillRunner1() {
+    if (runner1Touched || !$('rn0')) return;
+    runners[0].name = ($('firstName').value.trim() + ' ' + $('lastName').value.trim()).trim();
+    $('rn0').value = runners[0].name;
+    refresh();
+  }
+  $('firstName').addEventListener('input', prefillRunner1);
+  $('lastName').addEventListener('input', prefillRunner1);
 
   // ----- pricing (display only; the server recalculates) -----
   function pricing() {
@@ -222,8 +235,10 @@
   // ----- validation -----
   function validate() {
     var errs = [], bad = [];
-    var name = $('contactName').value.trim(), email = $('email').value.trim(), phone = $('phone').value.trim();
-    if (!name) { errs.push('Enter your name.'); bad.push('contactName'); }
+    var first = $('firstName').value.trim(), last = $('lastName').value.trim();
+    var email = $('email').value.trim(), phone = $('phone').value.trim();
+    if (!first) { errs.push('Enter your first name.'); bad.push('firstName'); }
+    if (!last) { errs.push('Enter your last name.'); bad.push('lastName'); }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errs.push('Enter a valid email address.'); bad.push('email'); }
     if (phone.replace(/\D/g, '').length < 10) { errs.push('Enter a phone number with area code.'); bad.push('phone'); }
     runners.forEach(function (r, i) {
@@ -251,7 +266,8 @@
 
   function buildReg() {
     return {
-      contactName: $('contactName').value.trim(),
+      firstName: $('firstName').value.trim(),
+      lastName: $('lastName').value.trim(),
       email: $('email').value.trim(),
       phone: $('phone').value.trim(),
       runners: runners.map(function (r) { return { name: r.name.trim(), category: r.category }; }),
