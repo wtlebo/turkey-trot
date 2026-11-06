@@ -57,6 +57,7 @@
   .done .check { width: 64px; height: 64px; border-radius: 50%; background: var(--green); color: #fff; font-size: 36px; display: grid; place-items: center; margin: 4px auto 12px; }
   .done ul { text-align: left; display: inline-block; margin: 8px 0 12px; }
   .small { font-size: 13px; color: var(--muted); }
+  .done a { color: var(--orange); }
   @media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } header h1 { font-size: 24px; } }
 </style>
 </head>
@@ -122,6 +123,9 @@
   // ===== Paste your Apps Script Web app URL (ends in /exec) between the quotes =====
   var API_URL = 'https://script.google.com/macros/s/AKfycbzVr-PeqPJV-w2gXO67FuFWYO346OaJhoVrEIcJZm4VWO6hA4wf7ixfabGHcGeIu9cu/exec';
   // ==================================================================================
+
+  // Linked from the confirmation screen after someone pays.
+  var DETAILS_URL = 'https://www.merrymountquincy.com/p/Turkey-Trot-2026';
 
   var CFG, CLIENT_ID;
 
@@ -361,7 +365,7 @@
       '<ul>' + list + '</ul>' +
       '<p><b>Paid: ' + money(res.paid != null ? res.paid : res.total) + '</b>' +
       (res.transactionId ? '<br><span class="small">PayPal transaction ' + esc(res.transactionId) + '</span>' : '') + '</p>' +
-      '<p>' + esc(res.note) + '</p>' +
+      '<p>Bib and hat pickup details are on our <a href="' + DETAILS_URL + '"><b>Turkey Trot page</b></a>.</p>' +
       '<p class="small">PayPal will email your payment receipt to ' + esc(res.email) + '.</p>';
     $('success').hidden = false;
     window.scrollTo(0, 0);
