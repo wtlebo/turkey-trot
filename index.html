@@ -279,9 +279,19 @@
     s.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(CLIENT_ID) +
       '&currency=USD&intent=capture&enable-funding=venmo&disable-funding=paylater';
     $('paypal').innerHTML = '<p class="small">Loading payment options…</p>';
+    s.setAttribute('data-namespace', 'paypalTT');   // private name, so browser extensions can't clash with it
     s.onload = function () {
-      try { renderButtons(); }
-      catch (e) { payProblem('PayPal could not start: ' + (e && e.message ? e.message : e)); }
+      var tries = 0;
+      (function waitForButtons() {
+        if (window.paypalTT && window.paypalTT.Buttons) {
+          try { renderButtons(); }
+          catch (e) { payProblem('PayPal could not start: ' + (e && e.message ? e.message : e)); }
+        } else if (++tries < 50) {
+          setTimeout(waitForButtons, 100);
+        } else {
+          payProblem('PayPal loaded but its buttons did not start. A browser extension or blocker may be interfering.');
+        }
+      })();
     };
     s.onerror = function () { $('paypal').innerHTML = '<div class="notice">Couldn\'t load PayPal. Please refresh the page.</div>'; };
     document.head.appendChild(s);
@@ -294,7 +304,7 @@
   }
 
   function renderButtons() {
-    if (!window.paypal || !paypal.Buttons) { payProblem('PayPal script loaded but paypal.Buttons is missing.'); return; }
+    var paypal = window.paypalTT;
     $('paypal').innerHTML = '';
     paypal.Buttons({
       style: { layout: 'vertical', shape: 'rect', label: 'pay', height: 45 },
